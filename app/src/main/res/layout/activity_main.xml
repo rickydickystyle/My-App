@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Login"
+        android:textSize="48sp"
+        android:textAlignment="center"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold">
+    </TextView>
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="50sp"
+        android:layout_marginLeft="20sp"
+        android:layout_marginTop="50sp"
+        android:layout_marginRight="20sp"
+        android:background="@color/white"
+        android:paddingLeft="10sp"
+        android:hint="Enter email"
+        android:textColorHint="@color/gray"
+        android:textColor="@color/black"
+        android:textSize="20sp">
+    </EditText>
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="50sp"
+        android:layout_marginLeft="20sp"
+        android:layout_marginTop="20sp"
+        android:layout_marginRight="20sp"
+        android:background="@color/white"
+        android:hint="Enter password"
+        android:paddingLeft="10sp"
+        android:textColorHint="@color/gray"
+        android:inputType="textPassword"
+        android:textColor="@color/black"
+        android:textSize="20sp">
+    </EditText>
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:text="Show password"
+        android:textSize="16dp"
+        android:checked="false">
+    </CheckBox>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:text="Sign In"
+            android:layout_centerInParent="true">
+
+        </Button>
+    </RelativeLayout>
+
+</LinearLayout>
