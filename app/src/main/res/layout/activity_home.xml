@@ -1,18 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeActivity"
     tools:ignore="ExtraText">
 
+    <LinearLayout
+        android:id="@+id/linearLayoutTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        tools:ignore="MissingConstraints"
+        android:layout_marginTop="50dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HELLO WORLD"
+            android:textSize="24sp"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:padding="10dp"
+            tools:ignore="MissingConstraints" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="50dp"
+            android:background="@color/gray"
+            android:text="Log out" />
+    </LinearLayout>
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPosts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="850dp"
         android:padding="16dp"
         android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/btnLogout"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayoutTop"
+        app:layout_constraintStart_toStartOf="@+id/linearLayoutTop"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutTop"
+        tools:ignore="MissingConstraints,NotSibling"
         tools:listitem="@layout/item_post" />
 
     <ImageView
