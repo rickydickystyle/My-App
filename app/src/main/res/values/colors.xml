@@ -3,4 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FF888888</color>
+    <color name="background_color">#F7F7F7</color>
+    <color name="primary_accent">#FFB3B3</color>
+    <color name="secondary_accent">#FFDDC1</color>
+    <color name="text_color">#333333</color>
+    <color name="button_highlight">#FFABAB</color>
 </resources>

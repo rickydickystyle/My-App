@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -31,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText editTxtPassword, editTxtEmail;
     Button btnLogin, btnRegister;
     FirebaseAuth mAuth;
+    ProgressBar progressbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         editTxtEmail = findViewById(R.id.editTextEmail);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
+        progressbar = findViewById(R.id.progressbar);
 
         checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -56,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressbar.setVisibility(View.VISIBLE);
                 String email, password;
                 email = editTxtEmail.getText().toString();//Cái nào cũng đc
                 password = String.valueOf(editTxtPassword.getText());
@@ -68,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                             .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressbar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Toast.makeText(LoginActivity.this, "Đăng nhập thành công",
                                                 Toast.LENGTH_SHORT).show();

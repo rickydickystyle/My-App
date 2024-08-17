@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeActivity"
+    android:background="@color/secondary_accent"
     tools:ignore="ExtraText">
 
     <LinearLayout
@@ -14,28 +15,36 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         tools:ignore="MissingConstraints"
-        android:layout_marginTop="50dp">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="5dp">
 
         <TextView
+            android:id="@+id/helloUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="HELLO WORLD"
-            android:textSize="24sp"
-            android:gravity="center_horizontal"
             android:layout_marginTop="50dp"
+            android:gravity="center_horizontal"
             android:padding="10dp"
-            tools:ignore="MissingConstraints" />
+            android:text="HELLO WORLD"
+            android:textStyle="bold|italic"
+            android:fontFamily=""
+            android:textColor="@color/button_highlight"
+            android:textSize="24sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnLogout" />
 
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
             android:layout_marginTop="50dp"
-            android:background="@color/gray"
-            android:text="Log out" />
-    </LinearLayout>
+            android:layout_marginLeft="60dp"
+            android:textColor="@color/white"
+            android:text="Log out"
+            app:layout_constraintTop_toTopOf="parent" />
 
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPosts"
@@ -50,17 +59,17 @@
         tools:ignore="MissingConstraints,NotSibling"
         tools:listitem="@layout/item_post" />
 
-    <ImageView
-        android:id="@+id/userAvatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="16dp"
-        android:layout_marginEnd="16dp"
-        tools:ignore="MissingConstraints">
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        android:src="glide"-->
+<!--    <ImageView-->
+<!--        android:id="@+id/userAvatar"-->
+<!--        android:layout_width="50dp"-->
+<!--        android:layout_height="50dp"-->
+<!--        android:layout_margin="16dp"-->
+<!--        android:layout_marginEnd="16dp"-->
+<!--        tools:ignore="MissingConstraints">-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:src="glide"&ndash;&gt;-->
 <!--        android:background="@drawable/avatar_background">-->
-    </ImageView>
+<!--    </ImageView>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

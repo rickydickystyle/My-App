@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -23,9 +24,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    EditText editTxtEmail, editTxtPassword;
+    EditText editTxtEmail, editTxtPassword, editTxtConfirmPassword;
     Button btnRegister, btnLogin;
     FirebaseAuth mAuth;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,26 +38,35 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         editTxtEmail = findViewById(R.id.editTextEmail);
         editTxtPassword = findViewById(R.id.editTextPassword);
+        editTxtConfirmPassword = findViewById(R.id.editTextConfirmPassword);
         btnRegister = findViewById(R.id.bntRegister);
         btnLogin = findViewById(R.id.btnLogin);
+        progressBar = findViewById(R.id.progressbar);
+
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressBar.setVisibility(View.VISIBLE);
                 String email, password;
                 email = editTxtEmail.getText().toString();//Cái nào cũng đc
                 password = String.valueOf(editTxtPassword.getText());
+
+                if(!password.equals(editTxtConfirmPassword.getText().toString())){
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(RegisterActivity.this, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 if(TextUtils.isEmpty(email) || TextUtils.isEmpty(password)){
                     Toast.makeText(RegisterActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }else{
-                    Toast.makeText(RegisterActivity.this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
-
                     mAuth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Toast.makeText(RegisterActivity.this, "Account created.",
                                                 Toast.LENGTH_SHORT).show();
