@@ -12,36 +12,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/primary_accent">
+        android:background="#CB6737D9"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="wrap_content"
-            android:textColor="@color/text_color"
             android:layout_height="wrap_content"
-            android:text="User Name"
-            android:textSize="18sp"
-            android:paddingLeft="10dp"
+            android:paddingLeft="5dp"
             android:paddingTop="5dp"
-            android:textStyle="bold"/>
+            android:text="User Name"
+            android:textColor="#64B5F6"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvPostContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@color/primary_accent"
-            android:textColor="@color/text_color"
-            android:paddingLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:paddingLeft="5dp"
             android:text="This is a post content."
-            android:textSize="16sp"/>
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
         <ImageView
             android:id="@+id/imgPostImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:padding="8dp"
             android:visibility="gone" />
 
     </LinearLayout>

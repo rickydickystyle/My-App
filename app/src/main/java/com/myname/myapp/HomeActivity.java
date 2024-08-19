@@ -128,8 +128,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
                 finish();
                 break;
             case 1:
-//                Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
-//                startActivity(profileIntent);
+                Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(profileIntent);
                 break;
             default:
                 break;
