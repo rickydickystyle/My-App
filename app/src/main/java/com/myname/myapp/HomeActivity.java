@@ -1,17 +1,17 @@
 package com.myname.myapp;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,12 +19,18 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.Firebase;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -34,33 +40,17 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
     FirebaseUser user;
     PostAdapter postAdapter;
     List<Post> postList;
-//    Button btnLogout;
     TextView txtUsername;
     Spinner spinner;
     private boolean isSpinnerTouched = false;
 
-
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if(currentUser != null){
-            return;
-        }
-        else {
-            Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(loginIntent);
-            finish();
-        }
-    }
-
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.recyclerViewPosts), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -74,63 +64,84 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
             Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginIntent);
             finish();
+            return;
         }
-        else{
-            txtUsername = findViewById(R.id.helloUserName);
-            int i = user.getEmail().indexOf("@");
-            txtUsername.setText("Hello, " + user.getEmail().substring(0, i));
-        }
+
+        txtUsername = findViewById(R.id.helloUserName);
+        int i = Objects.requireNonNull(user.getEmail()).indexOf("@");
+        txtUsername.setText("Hello, " + user.getEmail().substring(0, i));
 
         spinner = findViewById(R.id.spinner);
-
-        ArrayAdapter spinnerAdapter = new ArrayAdapter(getApplicationContext(),
-                R.layout.empty_spinner_item, spinnerOptions);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, R.layout.empty_spinner_item, spinnerOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
-
-        int initialSelectedPosition= spinner.getSelectedItemPosition();
-        spinner.setSelection(initialSelectedPosition, false);
         spinner.setOnItemSelectedListener(this);
 
-        spinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                isSpinnerTouched = true;
-                return false;
-            }
+        spinner.setOnTouchListener((view, motionEvent) -> {
+            isSpinnerTouched = true;
+            return false;
         });
 
+        FloatingActionButton fab = findViewById(R.id.fabPost);
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, PostActivity.class);
+            startActivity(intent);
+        });
 
-//        btnLogout = findViewById(R.id.btnLogout);
+        // Initialize postList and postAdapter before setting up RecyclerView
+        postList = new ArrayList<>();
+        postAdapter = new PostAdapter(postList);
+
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts);
         recyclerViewPosts.setAdapter(postAdapter);
         recyclerViewPosts.setLayoutManager(new LinearLayoutManager(this));
-        postList = new ArrayList<>();
 
-        postList.add(new Post("User 1", "Xin chào", "https://i.imgur.com/mjhluqn.jpeg"));
-        postList.add(new Post("User 2", "Hello", "https://i.imgur.com/H7YSbAz.jpeg"));
-        postList.add(new Post("User 3", "Hi", "https://i.imgur.com/5877KdX.jpeg"));
-        postList.add(new Post("User 4", "Hee hee", "https://i.imgur.com/Dhwbe5T.jpeg"));
+        DatabaseReference postsRef = FirebaseDatabase.getInstance().getReference("posts");
 
-        postAdapter = new PostAdapter(postList);
-        recyclerViewPosts.setAdapter(postAdapter);
+        postsRef.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Post> newPosts = new ArrayList<>();
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Post post = postSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        newPosts.add(post);
+                    }
+                }
+                updatePosts(newPosts);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomeActivity.this, "Failed to load posts.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updatePosts(List<Post> posts) {
+        postList.clear();
+        postList.addAll(posts);
+        postAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
         if (!isSpinnerTouched) return;
-        switch (pos){
-            case 0:
+
+        switch (pos) {
+            case 0: // Log out
                 auth.signOut();
                 Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(loginIntent);
                 finish();
                 break;
-            case 1:
-                Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
-                startActivity(profileIntent);
+
+            case 1: // User Profile
+                Intent PostIntent= new Intent(getApplicationContext(), PostActivity.class);
+                startActivity(PostIntent);
                 break;
+
             default:
                 break;
         }
@@ -138,6 +149,6 @@ public class HomeActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
+        // No action needed
     }
 }

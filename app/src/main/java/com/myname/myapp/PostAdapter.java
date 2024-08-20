@@ -1,5 +1,4 @@
 package com.myname.myapp;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,26 +23,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_post, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
         return new PostViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Post post = postList.get(position);
-        holder.tvUserName.setText(post.getUserName());
         holder.tvPostContent.setText(post.getContent());
 
-        // Kiểm tra xem bài đăng có hình ảnh không và sử dụng Glide để tải hình ảnh từ URL
-        if (post.getUrlImage() != null && !post.getUrlImage().isEmpty()) {
-            holder.imgPostImage.setVisibility(View.VISIBLE);
-            Glide.with(holder.itemView.getContext())
-                    .load(post.getUrlImage())
-                    .into(holder.imgPostImage);
-        } else {
-            holder.imgPostImage.setVisibility(View.GONE);
-        }
+        // Sử dụng Glide để tải ảnh từ URL
+        Glide.with(holder.itemView.getContext())
+                .load(post.getImageUrl())
+                .placeholder(R.drawable.bg_button)  // Ảnh hiển thị khi tải
+                .error(R.drawable.bg_button)  // Ảnh hiển thị khi lỗi
+                .into(holder.imgPostImage);
     }
 
     @Override
@@ -51,15 +45,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return postList.size();
     }
 
-    static class PostViewHolder extends RecyclerView.ViewHolder {
-        TextView tvUserName, tvPostContent;
+    public static class PostViewHolder extends RecyclerView.ViewHolder {
+        TextView tvPostContent;
         ImageView imgPostImage;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvUserName = itemView.findViewById(R.id.tvUserName);
             tvPostContent = itemView.findViewById(R.id.tvPostContent);
             imgPostImage = itemView.findViewById(R.id.imgPostImage);
         }
     }
 }
+

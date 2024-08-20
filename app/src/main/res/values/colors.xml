@@ -7,5 +7,6 @@
     <color name="primary_accent">#FFB3B3</color>
     <color name="secondary_accent">#FFDDC1</color>
     <color name="text_color">#333333</color>
-    <color name="button_highlight">#FFABAB</color>
+    <color name="button_highlight">#87D0C1</color>
+    <color name="mix" >#87D0C1</color>
 </resources>
