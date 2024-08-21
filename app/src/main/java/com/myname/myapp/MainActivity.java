@@ -1,38 +1,35 @@
 package com.myname.myapp;
 
-import android.annotation.SuppressLint;
+import static java.util.Objects.requireNonNull;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.activity.EdgeToEdge;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
-public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    RecyclerView recyclerViewPosts;
-    FirebaseAuth auth;
-    FirebaseUser user;
-    PostAdapter postAdapter;
-    List<Post> postList;
     Toolbar toolbar;
-    NavigationView navigationView;
     DrawerLayout drawerLayout;
+    NavigationView navView;
+    FirebaseAuth auth;
+    ActionBarDrawerToggle toggle;
 
     @Override
     public void onStart() {
@@ -44,13 +41,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
         // Chưa đăng nhập thì chuyển ra màn hình đăng nhập
         else {
-            Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+            Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginIntent);
             finish();
         }
     }
 
-    @SuppressLint("MissingInflatedId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(toggle.onOptionsItemSelected(item)){
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,43 +62,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-
+        navView = findViewById(R.id.navView);
+        drawerLayout = findViewById(R.id.drawerLayout);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-        drawerLayout.addDrawerListener(toggle);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar ,R.string.open_nav, R.string.close_nav);
         toggle.syncState();
 
-        navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Inflate nội dung của HomeActivity vào FrameLayout
-        getLayoutInflater().inflate(R.layout.activity_home, findViewById(R.id.contentFrame), true);
-
-        if (user == null) {
-            Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
-            startActivity(loginIntent);
-            finish();
-        }
-
-        //Dữ liệu mẫu
-        recyclerViewPosts = findViewById(R.id.recyclerViewPosts);
-        recyclerViewPosts.setAdapter(postAdapter);
-        recyclerViewPosts.setLayoutManager(new LinearLayoutManager(this));
-        postList = new ArrayList<>();
-
-        postList.add(new Post("User 1", "Xin chào", "https://i.imgur.com/mjhluqn.jpeg"));
-        postList.add(new Post("User 2", "Hello", "https://i.imgur.com/H7YSbAz.jpeg"));
-        postList.add(new Post("User 3", "Hi", "https://i.imgur.com/5877KdX.jpeg"));
-        postList.add(new Post("User 4", "Hee hee", "https://i.imgur.com/Dhwbe5T.jpeg"));
-
-        postAdapter = new PostAdapter(postList);
-        recyclerViewPosts.setAdapter(postAdapter);
-
+        drawerLayout.addDrawerListener(toggle);
+        navView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -123,5 +100,18 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
+        super.onBackPressed();
     }
 }

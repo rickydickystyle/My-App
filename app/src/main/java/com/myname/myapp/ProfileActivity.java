@@ -1,11 +1,13 @@
 package com.myname.myapp;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
@@ -18,10 +20,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -55,12 +61,12 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
-
 
         avatarImageView = findViewById(R.id.avatar);
         avatarImageView.setOnClickListener(v -> askCameraPermission());
@@ -90,7 +96,6 @@ public class ProfileActivity extends AppCompatActivity {
             int i = user.getEmail().indexOf("@");
             txtDisplayName.setText(user.getEmail().substring(0, i));
         }
-
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,33 +172,20 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private String saveImageToStorage(Bitmap bitmap) throws IOException {
-        try {
-            File directory = new File(getFilesDir(), "avatars");
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-            File file = new File(directory, "avatar_image.jpg");
-            FileOutputStream fos = new FileOutputStream(file);
+        File directory = new File(getFilesDir(), "avatars");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        File file = new File(directory, "avatar_image.jpg");
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return null;
+        return file.getAbsolutePath();
     }
 
-    private Bitmap loadImageFromStorage() {
-        try {
-            File directory = new File(getFilesDir(), "avatars");
-            File file = new File(directory, "avatar_image.*");
-            return BitmapFactory.decodeFile(file.getAbsolutePath());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private Bitmap loadImageFromStorage(String path) {
+        return BitmapFactory.decodeFile(path);
     }
 
     private void saveAvatarPath(String path) {
@@ -207,6 +199,4 @@ public class ProfileActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         return preferences.getString("avatar_path", null);
     }
-
-
 }
