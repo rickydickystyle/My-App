@@ -9,9 +9,13 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="comment">Comment</string>
+    <string name="acdx">ACDX</string>
+    <string name="like">Like</string>
+    <string name="todo">TODO</string>
+    <string name="_2_hours_ago">2 hours ago</string>
+    <string name="username">UserName</string>
+    <string name="add_new_post" />
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
 </resources>

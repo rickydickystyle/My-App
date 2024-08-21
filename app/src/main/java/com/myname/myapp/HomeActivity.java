@@ -81,22 +81,22 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             finish();
         }
 
-        //Dữ liệu mẫu
+        //Sửa từ đây trở xuống nha sinh
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts);
         recyclerViewPosts.setAdapter(postAdapter);
         recyclerViewPosts.setLayoutManager(new LinearLayoutManager(this));
         postList = new ArrayList<>();
 
-        postList.add(new Post("User 1", "Xin chào", "https://i.imgur.com/mjhluqn.jpeg"));
-        postList.add(new Post("User 2", "Hello", "https://i.imgur.com/H7YSbAz.jpeg"));
-        postList.add(new Post("User 3", "Hi", "https://i.imgur.com/5877KdX.jpeg"));
-        postList.add(new Post("User 4", "Hee hee", "https://i.imgur.com/Dhwbe5T.jpeg"));
+//        postList.add(new Post("User 1", "Xin chào", "https://i.imgur.com/mjhluqn.jpeg"));
+//        postList.add(new Post("User 2", "Hello", "https://i.imgur.com/H7YSbAz.jpeg"));
+//        postList.add(new Post("User 3", "Hi", "https://i.imgur.com/5877KdX.jpeg"));
+//        postList.add(new Post("User 4", "Hee hee", "https://i.imgur.com/Dhwbe5T.jpeg"));
 
         postAdapter = new PostAdapter(postList);
         recyclerViewPosts.setAdapter(postAdapter);
 
     }
-
+    //Đừng đụng cái này nha sinh
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         try {
