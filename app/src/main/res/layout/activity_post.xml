@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:ignore="HardcodedText">
+    tools:ignore="HardcodedText"
+    android:id="@+id/posting">
 
     <!-- Header with Back Button and Title -->
     <LinearLayout
@@ -50,7 +51,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Post Image Preview -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/cardViewImage"
         android:layout_width="23dp"
         android:layout_height="16dp"
@@ -62,7 +63,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- Select Image Button -->
     <Button

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 
@@ -19,6 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +62,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        FirebaseDatabase.getInstance().goOnline();
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
@@ -82,20 +89,42 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //Sửa từ đây trở xuống nha sinh
+        postList = new ArrayList<>();
+        postAdapter = new PostAdapter(postList);
+
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts);
         recyclerViewPosts.setAdapter(postAdapter);
         recyclerViewPosts.setLayoutManager(new LinearLayoutManager(this));
-        postList = new ArrayList<>();
 
-//        postList.add(new Post("User 1", "Xin chào", "https://i.imgur.com/mjhluqn.jpeg"));
-//        postList.add(new Post("User 2", "Hello", "https://i.imgur.com/H7YSbAz.jpeg"));
-//        postList.add(new Post("User 3", "Hi", "https://i.imgur.com/5877KdX.jpeg"));
-//        postList.add(new Post("User 4", "Hee hee", "https://i.imgur.com/Dhwbe5T.jpeg"));
+        DatabaseReference postsRef = FirebaseDatabase.getInstance().getReference("posts");
 
-        postAdapter = new PostAdapter(postList);
-        recyclerViewPosts.setAdapter(postAdapter);
+        postsRef.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Post> newPosts = new ArrayList<>();
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Post post = postSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        newPosts.add(post);
+                    }
+                }
+                updatePosts(newPosts);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomeActivity.this, "Failed to load posts.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+    private void updatePosts(List<Post> posts) {
+        postList.clear();
+        postList.addAll(posts);
+        postAdapter.notifyDataSetChanged();
+    }
+
     //Đừng đụng cái này nha sinh
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -104,7 +133,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             if (itemId == R.id.my_profile) {
                 Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
                 startActivity(profileIntent);
-
                 return true;
             } else if (itemId == R.id.logout) {
                 auth.signOut();
@@ -115,7 +143,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             } else if (itemId == R.id.home) {
                 Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(homeIntent);
-
+                return true;
+            } else if (itemId == R.id.posting) {
+                Intent postingIntent = new Intent(getApplicationContext(), PostActivity.class);
+                startActivity(postingIntent);
                 return true;
             }
         } catch (Exception e) {
@@ -123,5 +154,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+    @Override
+    protected void onDestroy() {
+        FirebaseDatabase.getInstance().goOffline();
+        Toast.makeText(getApplicationContext(), "Disconnecting", Toast.LENGTH_SHORT).show();
+        super.onDestroy();
     }
 }

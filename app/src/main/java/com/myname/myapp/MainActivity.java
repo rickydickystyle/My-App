@@ -81,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (itemId == R.id.my_profile) {
                 Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
                 startActivity(profileIntent);
-
                 return true;
             } else if (itemId == R.id.logout) {
                 auth.signOut();
@@ -92,7 +91,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else if (itemId == R.id.home) {
                 Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(homeIntent);
-
+                return true;
+            }  else if (itemId == R.id.posting) {
+                Intent postingIntent = new Intent(getApplicationContext(), PostActivity.class);
+                startActivity(postingIntent);
                 return true;
             }
         } catch (Exception e) {

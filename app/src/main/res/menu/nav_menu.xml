@@ -17,6 +17,11 @@
             android:title="My Profile">
         </item>
 
+        <item android:id="@+id/posting"
+            android:icon="@drawable/add_post"
+            android:title="Upload your post">
+        </item>
+
     </group>
 
     <item android:id="@+id/logout"
