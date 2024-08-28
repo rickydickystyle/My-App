@@ -1,54 +1,63 @@
 package com.myname.myapp;
 
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.google.android.material.navigation.NavigationView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.Objects;
+
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private static final int CAMERA_REQUEST_CODE = 100;
-    private static final int CAMERA_PERMISSION_CODE = 101;
+    private static final int PICK_IMAGE_REQUEST = 202;
     ImageView avatarImageView;
     Button btnPostList, btnBack, btnFriendList;
     FirebaseAuth auth;
     FirebaseUser user;
     TextView txtDisplayName;
+    private Uri imageUri;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
 
     @Override
     public void onStart() {
         super.onStart();
+        if (imageUri != null) {
+            uploadImageToFirebase(imageUri);
+        } else {
+            loadUserAvatar();
+        }
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = auth.getCurrentUser();
         if(currentUser != null){
@@ -69,15 +78,8 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         avatarImageView = findViewById(R.id.avatar);
-        avatarImageView.setOnClickListener(v -> askCameraPermission());
 
-        String avatarPath = loadAvatarPath();
-        if (avatarPath != null) {
-            Bitmap savedAvatar = BitmapFactory.decodeFile(avatarPath);
-            if (savedAvatar != null) {
-                avatarImageView.setImageBitmap(savedAvatar);
-            }
-        }
+        avatarImageView.setOnClickListener(v -> openImageChooser());
 
         btnPostList = findViewById(R.id.btnPostList);
         btnBack = findViewById(R.id.btnBack);
@@ -85,6 +87,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
+
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         if (user == null) {
             Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -125,78 +130,150 @@ public class ProfileActivity extends AppCompatActivity {
 //        });
     }
 
-    private void askCameraPermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, CAMERA_PERMISSION_CODE);
-        } else {
-            openCamera();
-        }
-    }
+    private void openImageChooser() {
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
 
-    private void openCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //noinspection deprecation
-        startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+
+        Intent chooser = Intent.createChooser(galleryIntent, "Select or Take a Picture");
+        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cameraIntent});
+
+        startActivityForResult(chooser, PICK_IMAGE_REQUEST);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            avatarImageView.setImageBitmap(photo);
-            try {
-                saveImageToStorage(photo);
-                String filePath = saveImageToStorage(photo); // lưu và lấy đường dẫn file
-                saveAvatarPath(filePath); // lưu đường dẫn file vào SharedPreferences
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            if (data.getData() != null) {
+                imageUri = data.getData();
+                // Hiển thị ảnh đã chọn trước khi tải lên
+                avatarImageView.setVisibility(View.VISIBLE);
+                avatarImageView.setImageURI(imageUri);
+
+                // Sau khi hiển thị ảnh, bắt đầu tải ảnh lên Firebase
+//                uploadImageToFirebase(imageUri);
+            } else if (data.getExtras() != null && data.getExtras().get("data") instanceof Bitmap) {
+                // Trường hợp người dùng chọn chụp ảnh thay vì chọn ảnh từ thư viện
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                avatarImageView.setVisibility(View.VISIBLE);
+                avatarImageView.setImageBitmap(bitmap);
+
+                // Chuyển đổi Bitmap thành URI và tải lên Firebase
+                imageUri = getImageUriFromBitmap(bitmap);
+//                uploadImageToFirebase(imageUri);
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera();
-            } else {
-                Toast.makeText(this, "Cho phép quyền truy cập vào máy ảnh?.", Toast.LENGTH_SHORT).show();
-            }
+    // Hàm này để chuyển đổi Bitmap thành URI (trong trường hợp ảnh chụp từ camera)
+    private Uri getImageUriFromBitmap(Bitmap bitmap) {
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Avatar", null);
+        return Uri.parse(path);
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        if (imageUri != null) {
+            // Lưu ảnh lên Firebase Storage
+            String fileName = "avatar_" + System.currentTimeMillis() + ".jpg";
+            StorageReference ref = storageReference.child("avatars/" + fileName);
+
+            ref.putFile(imageUri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Lấy URL của ảnh đã tải lên
+                        ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String imageUrl = uri.toString();
+                            // Lưu URL vào Firebase Database hoặc SharedPreferences
+                            saveAvatarUrlToSharedPreferences(imageUrl);
+
+                            // Cập nhật ảnh đại diện
+                            Glide.with(ProfileActivity.this)
+                                    .load(imageUrl)
+                                    .placeholder(R.drawable.ic_3)
+                                    .into(avatarImageView);
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("Firebase", "Upload failed: " + e.getMessage());
+                    });
         }
     }
 
-    private String saveImageToStorage(Bitmap bitmap) throws IOException {
-        File directory = new File(getFilesDir(), "avatars");
-        if (!directory.exists()) {
-            directory.mkdirs();
+
+//    private void uploadImageToFirebase(Uri imageUri) {
+//        String fileName = "avatar_" + System.currentTimeMillis() + ".*";
+//
+//        StorageReference ref = storageReference.child("avatars/" + fileName);
+//
+//        ref.putFile(imageUri)
+//                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                        // Lấy URL của ảnh đã tải lên
+//                        ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                            @Override
+//                            public void onSuccess(Uri uri) {
+//                                String imageUrl = uri.toString();
+//                                // Lưu URL vào Firebase Database hoặc sử dụng theo cách khác
+//                                Log.d("Firebase", "Upload success: " + imageUrl);
+//                            }
+//                        });
+//                        saveImageUrlToDatabase(imageUri.toString());
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.e("Firebase", "Upload failed: " + e.getMessage());
+//                    }
+//                });
+//    }
+
+    private void saveImageUrlToDatabase(String imageUrl) {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(Objects.requireNonNull(user.getUid())).child("avatar");
+        databaseRef.setValue(imageUrl)
+                .addOnSuccessListener(aVoid -> Log.d("Firebase", "Avatar URL saved to database"))
+                .addOnFailureListener(e -> Log.e("Firebase", "Failed to save URL: " + e.getMessage()));
+    }
+
+    private void saveAvatarUrlToSharedPreferences(String imageUrl) {
+        getSharedPreferences("UserPrefs", MODE_PRIVATE).edit()
+                .putString("avatar_url", imageUrl).apply();
+    }
+
+    private String getAvatarUrlFromSharedPreferences() {
+        return getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                .getString("avatar_url", null);
+    }
+
+    private void loadUserAvatar() {
+        String avatarUrl = getAvatarUrlFromSharedPreferences();
+        if (avatarUrl != null) {
+            Glide.with(ProfileActivity.this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.ic_3)
+                    .into(avatarImageView);
+        } else {
+            // Nếu không có URL trong SharedPreferences, tải từ Firebase
+            DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("users")
+                    .child(Objects.requireNonNull(user.getUid())).child("avatar");
+
+            databaseRef.get().addOnSuccessListener(dataSnapshot -> {
+                if (dataSnapshot.exists()) {
+                    String url = dataSnapshot.getValue(String.class);
+                    if (!TextUtils.isEmpty(url)) {
+                        saveAvatarUrlToSharedPreferences(url);
+                        Glide.with(ProfileActivity.this)
+                                .load(url)
+                                .placeholder(R.drawable.ic_3)
+                                .into(avatarImageView);
+                    }
+                }
+            }).addOnFailureListener(e -> Log.e("Firebase", "Failed to load avatar: " + e.getMessage()));
         }
-        File file = new File(directory, "avatar_image.jpg");
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-        }
-        return file.getAbsolutePath();
     }
 
-    private Bitmap loadImageFromStorage(String path) {
-        return BitmapFactory.decodeFile(path);
-    }
-
-    private void saveAvatarPath(String path) {
-        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("avatar_path", path);
-        editor.apply();
-    }
-
-    private String loadAvatarPath() {
-        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        return preferences.getString("avatar_path", null);
-    }
 }

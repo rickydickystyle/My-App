@@ -47,7 +47,6 @@ android {
     }
 }
 
-
 dependencies {
 
     implementation(libs.appcompat)
@@ -61,12 +60,10 @@ dependencies {
     implementation(libs.firebase.database)
     implementation ("com.google.firebase:firebase-storage:21.0.0")
     implementation ("com.google.android.material:material:1.12.0")
+    implementation(libs.play.services.cast.framework)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
-
-
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
 }
