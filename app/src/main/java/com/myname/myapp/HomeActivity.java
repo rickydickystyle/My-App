@@ -45,6 +45,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     DrawerLayout drawerLayout;
 
+
     @Override
     public void onStart() {
         super.onStart();

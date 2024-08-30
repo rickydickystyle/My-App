@@ -9,15 +9,18 @@ public class User {
     private String email;
     private String password;
     private boolean isOnline;
+    private String role;
     private List<Post> userPosts;
 
 
-    public User(String userId, String name, String email, String password) {
+    public User(String userId, String name, String role, String email, String password) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.password = password;
         this.isOnline = false;
+        this.role = role;
+        this.setRole(role);
         this.userPosts = new ArrayList<>();
     }
 
@@ -71,6 +74,14 @@ public class User {
 
     public void removePost(Post post) {
         userPosts.remove(post);
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 
