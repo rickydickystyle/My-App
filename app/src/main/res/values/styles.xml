@@ -9,4 +9,13 @@
 <!--            app:fontProviderCerts="@array/com_google_android_gms_fonts_certs">-->
 <!--        </font-family>-->
 <!--    </style>-->
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Các thuộc tính khác -->
+    </style>
 </resources>

@@ -21,6 +21,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -28,6 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
     Button btnRegister, btnLogin;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
+    DatabaseReference usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,8 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        // Tham chiếu tới node "Users" trong Firebase Realtime Database
+        usersRef = FirebaseDatabase.getInstance().getReference("Users");
         editTxtEmail = findViewById(R.id.editTextEmail);
         editTxtPassword = findViewById(R.id.editTextPassword);
         editTxtConfirmPassword = findViewById(R.id.editTextConfirmPassword);
@@ -70,6 +75,12 @@ public class RegisterActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         Toast.makeText(RegisterActivity.this, "Account created.",
                                                 Toast.LENGTH_SHORT).show();
+                                        // Lấy user hiện tại
+                                        FirebaseUser user = mAuth.getCurrentUser();
+                                        if (user != null) {
+                                            // Lưu email vào Realtime Database
+                                            usersRef.child(user.getUid()).child("email").setValue(user.getEmail());
+                                        }
                                         Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
                                         startActivity(homeIntent);
                                         finish();

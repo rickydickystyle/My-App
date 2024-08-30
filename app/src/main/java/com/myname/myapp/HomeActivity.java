@@ -3,6 +3,7 @@ package com.myname.myapp;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -24,10 +25,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -90,7 +95,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         //Sửa từ đây trở xuống nha sinh
         postList = new ArrayList<>();
-        postAdapter = new PostAdapter(postList);
+        postAdapter = new PostAdapter(this, postList);
 
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts);
         recyclerViewPosts.setAdapter(postAdapter);
@@ -104,11 +109,42 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<Post> newPosts = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Post post = postSnapshot.getValue(Post.class);
-                    if (post != null) {
-                        newPosts.add(post);
+                    Post post = new Post();
+
+                    // Lấy các giá trị đơn giản
+                    post.setPostId(postSnapshot.child("postId").getValue(String.class));
+                    post.setContent(postSnapshot.child("content").getValue(String.class));
+                    post.setImageUrl(postSnapshot.child("imageUrl").getValue(String.class));
+                    post.setUserId(postSnapshot.child("userId").getValue(String.class));
+
+                    // Xử lý likeCount và timestamp, sử dụng giá trị mặc định nếu null
+                    Integer likeCount = postSnapshot.child("likeCount").getValue(Integer.class);
+                    post.setLikeCount(likeCount != null ? likeCount : 0);
+
+                    Long timestamp = postSnapshot.child("timestamp").getValue(Long.class);
+                    post.setTimestamp(timestamp != null ? timestamp : System.currentTimeMillis());
+
+                    // Xử lý trường likes nếu nó tồn tại
+                    if (postSnapshot.hasChild("likes")) {
+                        GenericTypeIndicator<Map<String, Boolean>> likesIndicator = new GenericTypeIndicator<Map<String, Boolean>>() {};
+                        Map<String, Boolean> likesMap = postSnapshot.child("likes").getValue(likesIndicator);
+                        post.setLikes(likesMap != null ? new HashMap<>(likesMap) : new HashMap<>());
+                    } else {
+                        post.setLikes(new HashMap<>());
                     }
+
+                    // Xử lý trường comments nếu nó tồn tại
+                    if (postSnapshot.hasChild("comments")) {
+                        GenericTypeIndicator<Map<String, Comment>> commentsIndicator = new GenericTypeIndicator<Map<String, Comment>>() {};
+                        Map<String, Comment> commentsMap = postSnapshot.child("comments").getValue(commentsIndicator);
+                        post.setComments(commentsMap != null ? new ArrayList<>(commentsMap.values()) : new ArrayList<>());
+                    } else {
+                        post.setComments(new ArrayList<>());
+                    }
+
+                    newPosts.add(post);
                 }
+                Collections.reverse(newPosts);
                 updatePosts(newPosts);
             }
 

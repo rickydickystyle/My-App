@@ -15,4 +15,9 @@
     <color name="text_color">#333333</color>
     <color name="button_highlight">#87D0C1</color>
     <color name="mix" >#87D0C1</color>
+
+    <!-- Màu chủ đạo của ứng dụng -->
+    <color name="colorPrimary">#6200EE</color> <!-- Màu tím đậm -->
+    <color name="colorPrimaryDark">#a9a9a9</color> <!-- Màu tím tối -->
+    <color name="colorAccent">#03DAC5</color> <!-- Màu xanh nước biển -->
 </resources>

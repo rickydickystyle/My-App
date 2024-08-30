@@ -22,6 +22,9 @@ import com.google.firebase.storage.StorageReference;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class PostActivity extends AppCompatActivity {
@@ -129,7 +132,11 @@ public class PostActivity extends AppCompatActivity {
         String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         long timestamp = System.currentTimeMillis();
 
-        Post newPost = new Post(postId, postContent, imageUrl, userId, timestamp);
+        // Thêm likeCount, likes, và comments vào khi tạo Post mới
+        int likeCount = 0;
+        List<Comment> comments = new ArrayList<>();
+
+        Post newPost = new Post(postId, postContent, imageUrl, userId, timestamp, likeCount, comments);
         postsRef.child(postId).setValue(newPost)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("PostActivity", "Post saved successfully");

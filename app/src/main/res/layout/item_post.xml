@@ -78,36 +78,68 @@
             android:baseline="@dimen/activity_horizontal_margin"
             android:visibility="visible"/>
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:id="@+id/imgLike"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_like_outline"
+                android:contentDescription="Like" />
+
+            <TextView
+                android:id="@+id/tvLikeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:text="0 Likes"/>
+
+        </LinearLayout>
+
+        <!-- Nút Comment -->
+        <Button
+            android:id="@+id/btnComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Comment"/>
+
+        <!-- Nút mở rộng/thu gọn Comment -->
+        <LinearLayout
+            android:id="@+id/layoutToggleComments"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="16dp">
+            android:gravity="center_vertical"
+            android:paddingTop="8dp">
 
-            <Button
-                android:id="@+id/btnLike"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+            <ImageView
+                android:id="@+id/imgToggleIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_expand_more"
+                android:contentDescription="Toggle Comments" />
+
+            <TextView
+                android:id="@+id/tvToggleComments"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/like"
-                android:textColor="@color/black"
-                android:drawableStart="@drawable/ic_like"
-                android:background="@android:color/transparent" />
-
-            <Button
-                android:id="@+id/btnComment"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/comment"
-                android:textColor="@color/black"
-                android:drawableStart="@drawable/ic_comment"
-                android:background="@android:color/transparent" />
-
+                android:text="Show Comments"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                android:paddingStart="8dp"/>
         </LinearLayout>
+
+        <!-- RecyclerView cho danh sách bình luận -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewComments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
 
